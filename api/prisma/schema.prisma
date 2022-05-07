@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResourceLocation {
+  USDA
+  TROPICOS
+  TELA_BOTANICA
+  POWO
+  PLANTNET
+  GIBF
+  WIKI_EN
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  firstName      String?
+  lastName       String?
+  username       String
+  emailAddress   String
+  password       String
+  homes          HomeUser[]
+  plants         HomePlant[]
+  Home           Home[]
+  UserForgotCode UserForgotCode[]
+  UserSession    UserSession[]
+}
+
+model UserForgotCode {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model UserSession {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+}
+
+model Home {
+  id      Int         @id @default(autoincrement())
+  name    String
+  owner   User        @relation(fields: [ownerId], references: [id])
+  users   HomeUser[]
+  ownerId Int
+  plants  HomePlant[]
+}
+
+model HomeLabel {
+  id         Int              @id @default(autoincrement())
+  name       String           @unique
+  homePlants HomePlantLabel[]
+}
+
+model HomePlantLabel {
+  homePlant   HomePlant? @relation(fields: [homePlantId], references: [id])
+  homePlantId Int
+  HomeLabel   HomeLabel? @relation(fields: [homeLabelId], references: [id])
+  homeLabelId Int
+
+  @@id([homePlantId, homeLabelId])
+}
+
+model HomeUser {
+  user   User @relation(fields: [userId], references: [id])
+  home   Home @relation(fields: [homeId], references: [id])
+  userId Int
+  homeId Int
+
+  @@id([userId, homeId])
+}
+
+model HomePlant {
+  id       Int              @id @default(autoincrement())
+  home     Home             @relation(fields: [homeId], references: [id])
+  homeId   Int
+  addedBy  User             @relation(fields: [userId], references: [id])
+  userId   Int
+  trefle   Plant?           @relation(fields: [trefleId], references: [trefleId])
+  trefleId Int?
+  labels   HomePlantLabel[]
+}
+
+model Plant {
+  id                  Int     @id @default(autoincrement())
+  trefleId            Int     @unique
+  scientificName      String
+  rank                String
+  genus               String
+  family              String
+  year                Int?
+  commonName          String?
+  familyCommonName    String?
+  imageURL            String?
+  flowerColor         String?
+  isFlowering         Boolean @default(false)
+  foliageColor        String?
+  foliageTexture      String?
+  fruitColor          String?
+  hasFruit            Boolean @default(false)
+  fruitMonths         Int?
+  bloomMonths         String?
+  groundHumidity      Int     @default(-1)
+  growthForm          String?
+  growthHabit         String?
+  growthMonths        String?
+  growthRate          String?
+  ediblePart          String?
+  isVegatable         Boolean @default(false)
+  isEdible            Boolean @default(false)
+  light               Int     @default(-1)
+  soilNutriments      Int     @default(-1)
+  soilSalinity        Int     @default(-1)
+  atmosphericHumidity Int     @default(-1)
+  averageHeight       Int     @default(-1)
+  maxHeight           Int     @default(-1)
+  minRootDepth        Int     @default(-1)
+  maxPH               Int     @default(-1)
+  minPH               Int     @default(-1)
+
+  commonNames   PlantCommonNames[]
+  distributions PlantDistributions[]
+  resources     PlantResource[]
+  synonyms      PlantSynonym[]
+  homePlants    HomePlant[]
+}
+
+model PlantCommonNames {
+  id      Int    @id @default(autoincrement())
+  name    String
+  plant   Plant  @relation(fields: [plantId], references: [id])
+  plantId Int
+}
+
+model PlantDistributions {
+  id       Int    @id @default(autoincrement())
+  location String
+  plant    Plant  @relation(fields: [plantId], references: [id])
+  plantId  Int
+}
+
+model PlantResource {
+  id       Int              @id @default(autoincrement())
+  location ResourceLocation
+  url      String
+  plant    Plant            @relation(fields: [plantId], references: [id])
+  plantId  Int
+}
+
+model PlantSynonym {
+  id      Int    @id @default(autoincrement())
+  name    String
+  plant   Plant  @relation(fields: [plantId], references: [id])
+  plantId Int
+}
