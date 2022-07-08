@@ -1,0 +1,525 @@
+{
+  "$id": "prisma",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "firstName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lastName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "username": {
+          "type": "string"
+        },
+        "emailAddress": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "homes": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomeUser"
+          }
+        },
+        "plants": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomePlant"
+          }
+        },
+        "Home": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/Home"
+          }
+        },
+        "UserForgotCode": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/UserForgotCode"
+          }
+        },
+        "UserSession": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/UserSession"
+          }
+        }
+      }
+    },
+    "UserForgotCode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "user": {
+          "$ref": "prisma#/definitions/User"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "UserSession": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "user": {
+          "$ref": "prisma#/definitions/User"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Home": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "prisma#/definitions/User"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomeUser"
+          }
+        },
+        "plants": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomePlant"
+          }
+        }
+      }
+    },
+    "HomeLabel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "homePlants": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomePlantLabel"
+          }
+        }
+      }
+    },
+    "HomePlantLabel": {
+      "type": "object",
+      "properties": {
+        "homePlant": {
+          "anyOf": [
+            {
+              "$ref": "prisma#/definitions/HomePlant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "HomeLabel": {
+          "anyOf": [
+            {
+              "$ref": "prisma#/definitions/HomeLabel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "HomeUser": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "prisma#/definitions/User"
+        },
+        "home": {
+          "$ref": "prisma#/definitions/Home"
+        }
+      }
+    },
+    "HomePlant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "home": {
+          "$ref": "prisma#/definitions/Home"
+        },
+        "addedBy": {
+          "$ref": "prisma#/definitions/User"
+        },
+        "trefle": {
+          "anyOf": [
+            {
+              "$ref": "prisma#/definitions/Plant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomePlantLabel"
+          }
+        }
+      }
+    },
+    "Plant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "trefleId": {
+          "type": "integer"
+        },
+        "scientificName": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "string"
+        },
+        "genus": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "commonName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "familyCommonName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imageURL": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "flowerColor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isFlowering": {
+          "type": "boolean",
+          "default": false
+        },
+        "foliageColor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "foliageTexture": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fruitColor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hasFruit": {
+          "type": "boolean",
+          "default": false
+        },
+        "fruitMonths": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "bloomMonths": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "groundHumidity": {
+          "type": "integer",
+          "default": -1
+        },
+        "growthForm": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "growthHabit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "growthMonths": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "growthRate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ediblePart": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isVegatable": {
+          "type": "boolean",
+          "default": false
+        },
+        "isEdible": {
+          "type": "boolean",
+          "default": false
+        },
+        "light": {
+          "type": "integer",
+          "default": -1
+        },
+        "soilNutriments": {
+          "type": "integer",
+          "default": -1
+        },
+        "soilSalinity": {
+          "type": "integer",
+          "default": -1
+        },
+        "atmosphericHumidity": {
+          "type": "integer",
+          "default": -1
+        },
+        "averageHeight": {
+          "type": "integer",
+          "default": -1
+        },
+        "maxHeight": {
+          "type": "integer",
+          "default": -1
+        },
+        "minRootDepth": {
+          "type": "integer",
+          "default": -1
+        },
+        "maxPH": {
+          "type": "integer",
+          "default": -1
+        },
+        "minPH": {
+          "type": "integer",
+          "default": -1
+        },
+        "commonNames": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/PlantCommonNames"
+          }
+        },
+        "distributions": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/PlantDistributions"
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/PlantResource"
+          }
+        },
+        "synonyms": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/PlantSynonym"
+          }
+        },
+        "homePlants": {
+          "type": "array",
+          "items": {
+            "$ref": "prisma#/definitions/HomePlant"
+          }
+        }
+      }
+    },
+    "PlantCommonNames": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "plant": {
+          "$ref": "prisma#/definitions/Plant"
+        }
+      }
+    },
+    "PlantDistributions": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "location": {
+          "type": "string"
+        },
+        "plant": {
+          "$ref": "prisma#/definitions/Plant"
+        }
+      }
+    },
+    "PlantResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "location": {
+          "type": "string",
+          "enum": [
+            "USDA",
+            "TROPICOS",
+            "TELA_BOTANICA",
+            "POWO",
+            "PLANTNET",
+            "GIBF",
+            "WIKI_EN"
+          ]
+        },
+        "url": {
+          "type": "string"
+        },
+        "plant": {
+          "$ref": "prisma#/definitions/Plant"
+        }
+      }
+    },
+    "PlantSynonym": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "plant": {
+          "$ref": "prisma#/definitions/Plant"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "user": {
+      "$ref": "prisma#/definitions/User"
+    },
+    "userForgotCode": {
+      "$ref": "prisma#/definitions/UserForgotCode"
+    },
+    "userSession": {
+      "$ref": "prisma#/definitions/UserSession"
+    },
+    "home": {
+      "$ref": "prisma#/definitions/Home"
+    },
+    "homeLabel": {
+      "$ref": "prisma#/definitions/HomeLabel"
+    },
+    "homePlantLabel": {
+      "$ref": "prisma#/definitions/HomePlantLabel"
+    },
+    "homeUser": {
+      "$ref": "prisma#/definitions/HomeUser"
+    },
+    "homePlant": {
+      "$ref": "prisma#/definitions/HomePlant"
+    },
+    "plant": {
+      "$ref": "prisma#/definitions/Plant"
+    },
+    "plantCommonNames": {
+      "$ref": "prisma#/definitions/PlantCommonNames"
+    },
+    "plantDistributions": {
+      "$ref": "prisma#/definitions/PlantDistributions"
+    },
+    "plantResource": {
+      "$ref": "prisma#/definitions/PlantResource"
+    },
+    "plantSynonym": {
+      "$ref": "prisma#/definitions/PlantSynonym"
+    }
+  }
+}
