@@ -1,5 +1,6 @@
+import { add, sub } from "date-fns";
+
 import Route from "../../../utils/route";
-import { add } from "date-fns";
 import bcrypt from "bcrypt";
 
 const route = new Route();
@@ -13,6 +14,16 @@ type PostBody = {
 };
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+
+route.get(async (req, res) => {
+  const user = await route.getUser(req);
+  if (user) res.send({ ...user, password: undefined });
+  else
+    res.status(404).send({
+      error: "User not found",
+      message: "User not found, please login"
+    });
+});
 
 route.post(
   async (req, res, { db }) => {
