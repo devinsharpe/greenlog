@@ -4,6 +4,7 @@ import Ajv, { JSONSchemaType } from "ajv";
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { PrismaClient } from "@prisma/client";
+import jsonwebtoken from "jsonwebtoken";
 
 export type Handler = (
   req: NextApiRequest,
@@ -143,6 +144,31 @@ class Route {
 
   delete(handler: Handler, schema?: SchemaObject) {
     this.methods.DELETE = { handler, schema };
+  }
+
+  async getUser(req: NextApiRequest) {
+    const token = req.cookies["greenlog-auth-token"];
+    if (token) {
+      try {
+        const decoded = jsonwebtoken.verify(
+          token,
+          process.env.JWT_SECRET || "secret"
+        ) as { session: number; exp: number };
+        const session = await this.db.userSession.findUnique({
+          where: { id: decoded.session }
+        });
+        if (!session) throw new Error("session not found");
+        const user = await this.db.user.findUnique({
+          where: { id: session.userId }
+        });
+        if (!user) throw new Error("user not found");
+        return user;
+      } catch (err) {
+        return null;
+      }
+    } else {
+      return null;
+    }
   }
 }
 
