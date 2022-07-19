@@ -8,34 +8,45 @@ import { PrismaClient } from "@prisma/client";
 export type Handler = (
   req: NextApiRequest,
   res: NextApiResponse,
-  pkg: { db?: PrismaClient }
+  pkg: { db: PrismaClient }
 ) => Promise<void> | void;
 
 type Methods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
-type MethodObject<T = {}, U = {}> = {
+type MethodObject = {
   [key in Methods]: {
     handler: Handler;
-    schema?: SchemaObject<T, U>;
+    schema?: SchemaObject;
   };
 };
 
-type SchemaObject<T = {}, U = {}> = {
-  query?: JSONSchemaType<T>;
-  body?: JSONSchemaType<U>;
+type PrevalidationObject = {
+  valid: boolean;
+  message?: string;
+};
+
+type SchemaObject = {
+  query?: Object;
+  body?: Object;
+  preValidation?: [
+    (
+      req: NextApiRequest,
+      db: PrismaClient
+    ) => Promise<PrevalidationObject> | PrevalidationObject
+  ];
 };
 
 class Route {
   private methods: MethodObject;
-  private db?: PrismaClient;
+  private db: PrismaClient;
   private ajv = new Ajv({
     removeAdditional: true,
     useDefaults: true,
     coerceTypes: true
   });
 
-  constructor(initDB = true) {
-    if (initDB) this.db = new PrismaClient();
+  constructor() {
+    this.db = new PrismaClient();
     this.setupSchema();
     this.methods = {} as MethodObject;
   }
@@ -47,15 +58,24 @@ class Route {
         .setHeader("Allow", Object.keys(this.methods).join(","))
         .status(404)
         .end();
+    } else if (typeof this.db === "undefined") {
+      res.status(500).send({ error: "Database not initialized" });
     } else if (this.methods.hasOwnProperty(method)) {
-      await this.methods[method].handler(
-        this.processRequest(req, this.methods[method].schema),
-        res,
-        { db: this.db }
-      );
+      try {
+        const { request, errors } = await this.processRequest(req, method);
+        if (errors) {
+          res.status(400).send({ errors });
+        } else {
+          await this.methods[method].handler(request, res, { db: this.db });
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+      }
     } else {
       res.status(405).end();
     }
+    this.db.$disconnect();
   };
 
   private setupSchema() {
@@ -75,13 +95,34 @@ class Route {
       additionalProperties: false
     });
     validate(obj);
+    return validate.errors;
   }
 
-  private processRequest(req: NextApiRequest, schema?: SchemaObject) {
-    console.log("processRequest");
-    if (schema && schema.query) this.validate(req.query, schema.query);
-    if (req.body && schema && schema.body) this.validate(req.body, schema.body);
-    return req;
+  private async processRequest(req: NextApiRequest, methodKey: Methods) {
+    const schema = this.methods[methodKey].schema;
+    let errors;
+    if (schema) {
+      if (schema.query)
+        errors = this.validate(
+          req.query,
+          schema.query as JSONSchemaType<unknown>
+        );
+      if (schema.body)
+        errors = this.validate(
+          req.body,
+          schema.body as JSONSchemaType<unknown>
+        );
+      if (schema.preValidation) {
+        errors = [];
+        for (const preValidation of schema.preValidation) {
+          const result = await preValidation(req, this.db);
+          if (!result.valid) {
+            errors.push(result.message);
+          }
+        }
+      }
+    }
+    return { request: req, errors };
   }
 
   get(handler: Handler, schema?: SchemaObject) {
